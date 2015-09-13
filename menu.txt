@@ -1,0 +1,4 @@
+Welcome to Pong!
+               
+To play a new game .... Press "p"
+To quit at any time ... Press "q"

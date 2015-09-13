@@ -1,0 +1,72 @@
+//Final Project -- Report
+//Tallis Bowers &&  Nicholas Jones
+
+For our final project, we attempted to recreate the 1970's hit video game Pong. Pong, which is a very rough tennis simulation, consists of two paddles that attempt to
+hit a bouncing ball past the opposite paddle in order to score a point. For more information on the game, please click this link in order to read further:
+<http://en.wikipedia.org/wiki/Pong>. Our rendition of the game is a one-player game, in which the user plays against a CPU opponent that follows basic AI principles.
+Upon opening the program, the user is given a menu, which opens a black screen with multiple colorful text displays; among them includes the options to start an "easy"
+game (press e), to start a "hard" game (press h), to quit (press q), as well as the instructions for moving one's paddle, which is moved upwards with the 's' key and
+downwards with the 'x' key. If the user inputs anything besides one of the initial options, another text output appears on the screen instructing the user to enter a
+valid input. Both the 'e' and 'h' options enter gameplay, with these modes similar apart from the computer paddle's behavior. The gameplay graphics are displayed with a
+green background that looks like a tennis court, with white lines; the user's paddle, on the left, is blue, and the computer's on the right, is red. Above the screen, the
+two players' scores are displayed in their respective colors. At the start of each point, both paddles are reset to a location near the middle of the screen, and the ball
+is released in a random direction and at a random velocity from the center of the screen; each time the ball crosses one player's side, the opponent is given a point,
+which is reflected in the "scoreboard" up at the top of the screen. The computer paddle always travels with the same vertical speed and direction as the ball, and 
+"jumps" a slight amount each time the user paddle hits the ball; the computer misses sometimes when played on Hard, and misses more often when played on Easy. When one
+player reaches 11 points, the game terminates and a different screen appears, giving the user a different message based on the result of the game (congratulations when
+the user wins, encouragement when the user loses). On this screen, the user is able to press any button, terminating the program.
+
+From a programming perspective, this project was fairly complex with respect to the simplicity of the game itself. The preprocessing step of this program is very large,
+consisting of the inclusion of 7 libraries for various purposes, most notably "gfx3.h", Professor Bualuan's and Professor Thain's graphics library, as well as predefining
+11 constant values that would be used throughout the program. A large number
+of functions are also predeclared, with this project having a heavy emphasis on decomposition of the problem at hand. Upon the start of main function execution, which
+does not utilize any command function input, is the predefinition of a number of variables; notably the float arrays of x[3] and y[3], which hold the x and y coordinates
+of the ball (x/y[0]), paddle 1 (x/y[1]), and paddle 2(x/y[2]), as well as the float array of v[2], which holds the x and y velocities of the ball. Additionally, there
+is a separate pointer, *xPtr, which is used to point to x[0] for convenience later in the function. Also included is an array of chars, Menu, which holds saying utilized
+in the menu at the start of the game, along with int values q and b, which are incremented as the program progresses in order to help with differentiation in random
+seeding. After initialization of some values, the function uses the <string.h> function of strcpy() to move a number of strings into the Menu array, and then uses 
+gfx_open() to open the graphics library, which is done in the X11 graphics environment. The program then utilizes a for loop and a case switch to control colors and
+locations of strings, and then uses gfx_text() to display the Menu sayings on the screen. Using gfx_wait, the program then receives user input, ensuring that it is
+valid, and if the input is 'q', returning 0 and terminating the program. Next, it progresses into the game control loop, which runs under the condition that the GameOver
+function is not yet valid. This function increments the values of b and v, and then sets the value of the variable isOut to the output of the function Initialize. This
+function, which has inputs of the two coordinate arrays, the velocity array, and "q", which is a counter, works by initializing the paddle locations to predefined points
+at the center of the screen, as with the ball location, and then by randomly generating velocity factors using a time-dependent random seed. The function is set,
+however, so that the vertical velocity of the ball cannot have such a high magnitude, as too great of a magnitude causes the ball to take a long time moving towards the
+paddles, making the game boring. This function always returns an int value of 0 to the isOut function, which moves the main function into the "point" loop, which runs
+under the condition that isOut == 0. The point loop, which runs once for each time step of .01 seconds, first uses the Recalculate function to obtain the location values
+of the ball and paddles. This function takes the *xPtr and the y[] arrays, as well as the current level of the game (determined at the menu screen), and random int b as
+input. The ball's values are assigned recursively using the previous locations added to the velocities in each direction multiplied by a timestep factor. The player's
+paddle is moved under the condition of a gfx_event_waiting function; if the player presses s, the y[1] position goes up by 30, and if the player presses x, the position
+goes down by 30 (directions are reversed in the actual program due to the nature of matrix coordinates versus traditional Cartesian coordinates). The computer paddle, which
+we created as to be moved by an AI rather than a real-life opponent, is moved by a random "jump", which is seeded by a value that includes time as well as "b", which is
+incremented each time the user paddle hits the ball; this random value makes it so the compuer player can follow the ball, but due to a random jump each time the ball is
+served or the user hits the ball, the computer sometimes misses, as we intended this to simulate the "reaction time" of a real-life tennis player or pong opponent. The 
+factor by which the random number is multiplied in the "hard" mode is 75, and in the "easy" mode is 200, as to make it much more likely that the computer misses the 
+ball on easy mode. After this function executes, the main function moves into the Bounce function, which takes all 3 of the primary float arrays as input; this includes
+two sub-functions, xCheckBounce and yCheckBounce, which both return integer values other than zero should a "bounce" take place (an X-bounce occurs when the ball hits
+one of the paddles, and a Y-bounce occurs when the ball hits the top or the bottom of the screen). If a "bounce" occurs, the direction is then multiplied by -1, which
+reverses the direction of the ball. This leads into the Animate function, which utilizes the x and y arrays, as well as the score array, as input. This function redraws
+the court each time using gfx_clear and a number of draw functions, then draws the ball (which appears solid) using a for loop of gfx_circle functions of increasing
+radius, and then draws the paddles using the gfx_fill_rectangle functions and a switch case. Lastly, the program uses the gfx_text function to display the current
+score values at the top of the screen, using the num2str() function that Professor Bualuan gave the class to use for the Lab 6 Graphing Calculator assignment. After this
+function terminates, the CheckOut function executes, which uses the value of xPtr to determine if the ball is still in play (returns 0), if the ball goes out the user's
+side (returns 2), or goes out the computer's side (returns 1). The value this returns is then passed onto the UpdateScore function, which increments the score of the
+player who won the point. The scores are then used as input into the GameOver function, which checks to see if either player has scored 11 points; if this is the case,
+the function returns the int value of the winning player, and the game terminates. The last part of the main function is the game over case switch, which gives the number
+of the winning player as input into the EndGame function; this function utilizes string values to display messages to the user dependant on the result of the game, and
+allows for the program to be exited upon the pressing of a button, due to a while loop and gfx_event_waiting. 
+
+We were able to verify this program's correctness by simply programming the game slowly and attempting to play it, and looking for glitches. Glitches we found and were
+able to correct throughout the process included the "random" number values simply performing the same way each time as well as AI errors. At different points in our
+process, the computer player has had the skill levels of both Roger Federer and someone who has never picked up a tennis racquet. Another error we had throughout our
+development was the ability for the paddles to leave the screen (even when the ball couldn't), and we fixed this by adding additional boundaries. We also had to do plenty
+of tinkering with function parameters, such as ball speed and paddle speed. We also acknowledge that the one-player nature of our game is likely different than what many
+other players would have done, particularly in a Pong game; while we did look into the process of modifying the gfx library and allowing another player into the game,
+which was not particularly complex, we decided that it would be a more interesting direction in which to take our project for us to work on a computer player. Both of us
+have separately stated our interest in video game artificial intelligence, and while what we did was extremely basic, it was definitely fascinating to try and create two
+computer players, both of whom shared similar "thought processes", but performed at different levels. Our last main point of difficulty in our project overall was 
+determination of a proper timestep and animation. Made even more difficult by our inability to work anywhere but the Linux machines in the Fitzpatrick Library due to lag,
+we saw a number of animation "quirks" (not necessarily glitches) that held up the development process, such as the ball simply traveling through the paddles, and the
+like. Apart from a strange error in which the ball seems to travel slightly past the paddle in location, but maintain its horizontal position in the animation, and then
+bounce off the opposite end in the paddle, which is occasionally seen when the ball hits a certain (undefinable) point, the animation and overall execution of our game
+appears to work fine and be a success.
